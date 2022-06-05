@@ -1,0 +1,26 @@
+{
+  "name": "based-demo",
+  "version": "1.0.0",
+  "description": "Demo for Based JWT flow template",
+  "license": "UNLICENSED",
+  "main": "dist/server/index.js",
+  "scripts": {
+    "start": "port=3030 && node dist/server/index.js",
+    "watch": "aristotle watch -t src/index.tsx -p 3030",
+    "build": "aristotle build -t src/index.tsx -d dist",
+    "postbuild": "cd ./dist && npm install --production"
+  },
+  "dependencies": {
+    "@based/client": "^2.7.5",
+    "@based/use-local-storage": "^0.4.0",
+    "@types/react": "^18.0.5",
+    "@types/react-dom": "^18.0.0",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2"
+  },
+  "devDependencies": {
+    "@saulx/aristotle": "^4.0.14",
+    "@based/cli": "^2.9.0",
+    "@based/server": "^2.8.10"
+  }
+}
