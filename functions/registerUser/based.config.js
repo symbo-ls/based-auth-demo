@@ -1,4 +1,4 @@
-export default {
+module.exports = {
   observable: false,
-  name: 'registerUser',
-}
+  name: "registerUser",
+};
