@@ -14,7 +14,7 @@
     "@based/pretty-date": "^1.0.4",
     "@based/react": "^3.0.2",
     "@based/client": "^3.0.1",
-    "@based/ui": "4.0.0-alpha.4"
+    "@based/ui": "4.0.0-alpha.5"
   },
   "devDependencies": {
     "@saulx/aristotle": "^4.0.14",

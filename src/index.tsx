@@ -60,53 +60,49 @@ const Todo = ({ id, name, description, createdAt, done }) => {
   );
 };
 
-const App = ({ user }) => {
+const App = ({ user }: { user: { id: string; token: string } }) => {
   const client = useClient();
   const [value, open] = useSelect(["Todo", "All", "Completed"], "All");
-  const { data, loading } = useData(
-    user
-      ? {
-          $id: user.id,
-          todos: {
-            id: true,
-            done: true,
-            name: true,
-            createdAt: true,
-            description: true,
-            $list: {
-              $sort: {
-                $field: "createdAt",
-                $order: "desc",
-              },
-              $limit: 100,
-              $offset: 0,
-              $find: {
-                $traverse: "children",
-                $filter:
-                  value === "All" || !value
-                    ? {
-                        $field: "type",
-                        $operator: "=",
-                        $value: "todo",
-                      }
-                    : [
-                        {
-                          $field: "type",
-                          $operator: "=",
-                          $value: "todo",
-                        },
-                        {
-                          $field: "done",
-                          $operator: "=",
-                          $value: value === "Completed",
-                        },
-                      ],
-              },
-            },
-          },
-        }
-      : null
-  );
+  const { data, loading } = useData({
+    $id: user.id,
+    todos: {
+      id: true,
+      done: true,
+      name: true,
+      createdAt: true,
+      description: true,
+      $list: {
+        $sort: {
+          $field: "createdAt",
+          $order: "desc",
+        },
+        $limit: 100,
+        $offset: 0,
+        $find: {
+          $traverse: "children",
+          $filter:
+            value === "All" || !value
+              ? {
+                  $field: "type",
+                  $operator: "=",
+                  $value: "todo",
+                }
+              : [
+                  {
+                    $field: "type",
+                    $operator: "=",
+                    $value: "todo",
+                  },
+                  {
+                    $field: "done",
+                    $operator: "=",
+                    $value: value === "Completed",
+                  },
+                ],
+        },
+      },
+    },
+  });
 
   return (
     <>
