@@ -15,7 +15,6 @@ import {
   AddIcon,
   EditIcon,
   useSelect,
-  MoreIcon,
   Input,
   CheckIcon,
 } from "@based/ui";
@@ -63,6 +62,23 @@ const Todo = ({ id, name, description, createdAt, done }) => {
 const App = ({ user }: { user: { id: string; token: string } }) => {
   const client = useClient();
   const [value, open] = useSelect(["Todo", "All", "Completed"], "All");
+
+  const filter: any[] = [
+    {
+      $field: "type",
+      $operator: "=",
+      $value: "todo",
+    },
+  ];
+
+  if (value === "Completed" || value == "Todo") {
+    filter.push({
+      $field: "done",
+      $operator: "=",
+      $value: value === "Completed",
+    });
+  }
+
   const { data, loading } = useData({
     $id: user.id,
     todos: {
@@ -80,25 +96,7 @@ const App = ({ user }: { user: { id: string; token: string } }) => {
         $offset: 0,
         $find: {
           $traverse: "children",
-          $filter:
-            value === "All" || !value
-              ? {
-                  $field: "type",
-                  $operator: "=",
-                  $value: "todo",
-                }
-              : [
-                  {
-                    $field: "type",
-                    $operator: "=",
-                    $value: "todo",
-                  },
-                  {
-                    $field: "done",
-                    $operator: "=",
-                    $value: value === "Completed",
-                  },
-                ],
+          $filter: filter,
         },
       },
     },
