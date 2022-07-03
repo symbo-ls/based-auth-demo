@@ -30,7 +30,6 @@ export const client = based({
 
 const Todo = ({ id, name, description, createdAt, done }) => {
   const client = useClient();
-  const [internalName, setName] = useState(name);
   return (
     <StackedListItem>
       <Avatar
@@ -43,10 +42,9 @@ const Todo = ({ id, name, description, createdAt, done }) => {
       />
       <div>
         <Input
-          value={internalName}
+          value={name}
           ghost
           onChange={(name) => {
-            setName(name);
             client.set({ $id: id, name });
           }}
           type="text"
