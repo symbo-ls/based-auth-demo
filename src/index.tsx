@@ -164,7 +164,7 @@ const App = ({ user }: { user: { id: string; token: string } }) => {
 
 render(
   <Provider theme="light" client={client}>
-    <Authorize logo app={App} />
+    <Authorize app={App} />
   </Provider>,
   document.body
 );

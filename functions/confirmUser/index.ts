@@ -28,7 +28,7 @@ export default async ({ based, payload }: Params) => {
       <meta charset="UTF-8" />
     </head>
     <body>
-      <div>Thanks for confirming the email 🌈!</div>
+      <div>YESSSS Thanks for confirming the email 🌈!</div>
     </body>
   </html>`;
 };
