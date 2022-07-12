@@ -31,11 +31,11 @@ export const client = based({
 const Todo = ({ id, name, description, createdAt, done }) => {
   const client = useClient();
   return (
-    <StackedListItem>
+    <StackedListItem border>
       <Avatar
         size={40}
-        icon={done ? CheckIcon({ size: 16 }) : EditIcon({ size: 16 })}
-        color={done ? "Green" : "BlueSailor"}
+        icon={done ? CheckIcon : EditIcon}
+        color={done ? "green" : "accent"}
         onClick={() => {
           client.set({ $id: id, done: !done });
         }}
@@ -50,7 +50,7 @@ const Todo = ({ id, name, description, createdAt, done }) => {
           type="text"
         />
         {/* <Text weight={600}>{name}</Text> */}
-        <Text color="TextSecondary">{description}</Text>
+        <Text color="text2">{description}</Text>
         <Text>{prettyDate(createdAt, "date-time")}</Text>
       </div>
     </StackedListItem>
@@ -125,7 +125,7 @@ const App = ({ user }: { user: { id: string; token: string } }) => {
           <StackedListItemsWrapper
             topLeft={
               <>
-                <Text color="PrimaryMain">Todos</Text>
+                <Text color="text2">Todos</Text>
                 <Button ghost onClick={open}>
                   {value || "All"}
                 </Button>
@@ -150,11 +150,9 @@ const App = ({ user }: { user: { id: string; token: string } }) => {
               </>
             }
           >
-            <div style={{}}>
-              {data.todos?.map((t) => {
-                return <Todo {...t} key={t.id} />;
-              })}
-            </div>
+            {data.todos?.map((t) => {
+              return <Todo {...t} key={t.id} />;
+            })}
           </StackedListItemsWrapper>
         )}
       </div>
