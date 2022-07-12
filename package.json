@@ -19,6 +19,6 @@
   "devDependencies": {
     "@based/cli": "^2.9.0",
     "@based/server": "^3.0.1",
-    "@saulx/aristotle": "^4.0.14"
+    "@saulx/aristotle": "^4.3.1"
   }
 }
