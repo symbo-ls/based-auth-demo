@@ -1,5 +1,5 @@
 {
-  "env": "<your dev>",
-  "project": "<your project>",
-  "org": "<your org>"
+  "env": "production",
+  "org": "saulx",
+  "project": "demo"
 }

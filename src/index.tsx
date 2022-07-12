@@ -1,133 +1,168 @@
-import React, { useEffect, useState } from 'react'
-import { render } from 'react-dom'
-import based from '@based/client'
-import useLocalStorage from '@based/use-local-storage'
-// @ts-ignore
-import basedConfig from '../based.json'
+import { render } from "react-dom";
+import React, { useState } from "react";
+import {
+  Provider,
+  Authorize,
+  Topbar,
+  LoadingIcon,
+  Text,
+  useContextMenu,
+  StackedListItemsWrapper,
+  StackedListItem,
+  Avatar,
+  UserProfile,
+  Button,
+  AddIcon,
+  EditIcon,
+  useSelect,
+  Input,
+  CheckIcon,
+} from "@based/ui";
+import based from "@based/client";
+import { useClient, useData } from "@based/react";
+import { prettyDate } from "@based/pretty-date";
 
-const client = based(basedConfig)
+export const client = based({
+  org: "saulx",
+  project: "demo",
+  env: "production",
+});
 
-let rootEl = document.getElementById('root')
+const Todo = ({ id, name, description, createdAt, done }) => {
+  const client = useClient();
+  return (
+    <StackedListItem border>
+      <Avatar
+        size={40}
+        icon={done ? CheckIcon : EditIcon}
+        color={done ? "green" : "accent"}
+        onClick={() => {
+          client.set({ $id: id, done: !done });
+        }}
+      />
+      <div>
+        <Input
+          value={name}
+          ghost
+          onChange={(name) => {
+            client.set({ $id: id, name });
+          }}
+          type="text"
+        />
+        {/* <Text weight={600}>{name}</Text> */}
+        <Text color="text2">{description}</Text>
+        <Text>{prettyDate(createdAt, "date-time")}</Text>
+      </div>
+    </StackedListItem>
+  );
+};
 
-if (!rootEl) {
-  rootEl = document.createElement('div')
-  rootEl.id = 'root'
-  document.body.appendChild(rootEl)
-}
+const App = ({ user }: { user: { id: string; token: string } }) => {
+  const client = useClient();
+  const [value, open] = useSelect(["Todo", "All", "Completed"], "All");
 
-const App = () => {
-  const [email, setEmail] = useState<string>()
-  const [password, setPassword] = useState<string>()
+  const filter: any[] = [
+    {
+      $field: "type",
+      $operator: "=",
+      $value: "todo",
+    },
+  ];
 
-  // Stores the token and refreshToken in local storage
-  const [token, setToken] = useLocalStorage('token')
-  const [refreshToken, setRefreshToken] = useLocalStorage('refreshToken')
-
-  const [data, setData] = useState<string>()
-
-  const renewHandler = ({ token: newToken }: { token: string }) => {
-    setToken(newToken)
+  if (value === "Completed" || value == "Todo") {
+    filter.push({
+      $field: "done",
+      $operator: "=",
+      $value: value === "Completed",
+    });
   }
 
-  useEffect(() => {
-    client.on('renewToken', renewHandler)
-    return () => {
-      client.removeListener('renewToken', renewHandler)
-    }
-  }, [])
-
-  useEffect(() => {
-    ;(async () => {
-      if (token) {
-        // Authenticates the user with the stored token and supplies the refreshToken
-        await client.auth(token, { refreshToken })
-      } else {
-        return client.auth(false)
-      }
-    })()
-
-    // Calls a data function
-    client
-      .call('getSomeData')
-      .then((result) => {
-        setData(result)
-      })
-      .catch((_err) => {
-        setData('No access')
-      })
-  }, [token])
+  const { data, loading } = useData({
+    $id: user.id,
+    todos: {
+      id: true,
+      done: true,
+      name: true,
+      createdAt: true,
+      description: true,
+      $list: {
+        $sort: {
+          $field: "createdAt",
+          $order: "desc",
+        },
+        $limit: 100,
+        $offset: 0,
+        $find: {
+          $traverse: "children",
+          $filter: filter,
+        },
+      },
+    },
+  });
 
   return (
-    <div
-      style={{
-        width: 300,
-        textAlign: 'left',
-        margin: 'auto',
-        paddingTop: 40,
-        fontFamily: 'sans-serif',
-        display: 'flex',
-        flexDirection: 'column',
-      }}
-    >
-      <p style={{ marginBottom: 16 }}>
-        <strong>Data: </strong>
-        {data}
-      </p>
-      {token ? (
-        <button
-          style={{
-            backgroundColor: 'lightgray',
-            padding: 8,
-            cursor: 'pointer',
-          }}
-          onClick={async () => {
-            await client.logout()
-            setToken(null)
-            setRefreshToken(null)
-          }}
-        >
-          Logout
-        </button>
-      ) : (
-        <>
-          <input
-            style={{ border: '1px solid black', marginBottom: 16 }}
-            placeholder="email"
-            name="email"
-            onChange={(e) => {
-              setEmail(e.target.value)
-            }}
-          />
-          <input
-            style={{ border: '1px solid black', marginBottom: 16 }}
-            placeholder="password"
-            type="password"
-            name="password"
-            onChange={(e) => {
-              setPassword(e.target.value)
-            }}
-          />
-          <button
-            style={{
-              backgroundColor: 'lightgray',
-              padding: 8,
-              cursor: 'pointer',
-            }}
-            onClick={async () => {
-              const { token, refreshToken } = await client.login({
-                email,
-                password,
-              })
-              setToken(token)
-              setRefreshToken(refreshToken)
-            }}
+    <>
+      <Topbar
+        data={{ Projects: "/", Settings: "/settings" }}
+        onProfile={useContextMenu(
+          UserProfile,
+          { id: user.id },
+          { position: "right", offset: { x: 0, y: 28 } }
+        )}
+      />
+      <div
+        style={{
+          padding: "32px 48px",
+          height: "calc(100vh - 66px)",
+          width: "100%",
+          overflowY: "auto",
+          overflowX: "hidden",
+        }}
+      >
+        {loading ? (
+          <LoadingIcon />
+        ) : (
+          <StackedListItemsWrapper
+            topLeft={
+              <>
+                <Text color="text2">Todos</Text>
+                <Button ghost onClick={open}>
+                  {value || "All"}
+                </Button>
+              </>
+            }
+            topRight={
+              <>
+                <Button
+                  onClick={async () => {
+                    await client.set({
+                      type: "todo",
+                      done: false,
+                      name: "New todo",
+                      parents: [user.id],
+                    });
+                  }}
+                  iconLeft={AddIcon}
+                  ghost
+                >
+                  Add Todo
+                </Button>
+              </>
+            }
           >
-            Login
-          </button>
-        </>
-      )}
-    </div>
-  )
-}
+            {data.todos?.map((t) => {
+              return <Todo {...t} key={t.id} />;
+            })}
+          </StackedListItemsWrapper>
+        )}
+      </div>
+    </>
+  );
+};
 
-render(<App />, rootEl)
+render(
+  <Provider theme="light" client={client}>
+    <Authorize app={App} />
+  </Provider>,
+  document.body
+);
